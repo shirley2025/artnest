@@ -477,6 +477,7 @@ function go(id){
 function ptab(btn,id){
   document.querySelectorAll('.ptb button').forEach(b=>b.classList.remove('active'));btn.classList.add('active');
   ['pp','pps'].forEach(i=>document.getElementById(i).style.display=i===id?'block':'none');
+  if(id==='pps')renderProfileShop();
 }
 function cm(id){document.getElementById(id).classList.remove('open');}
 function om(id){document.getElementById(id).classList.add('open');}
@@ -562,6 +563,7 @@ function renderProfile(){
   if(!arts.length){pe.style.display='flex';return;}pe.style.display='none';
   arts.forEach(a=>{const el=document.createElement('div');el.className='mi';el.onclick=()=>openDetail(a.id);
     el.innerHTML=`<img src="${a.imageData}" loading="lazy"/><div class="ct">${a.chainId.slice(0,8)}…</div>`;pg.appendChild(el);});
+  renderProfileShop();
 }
 function replaceShopImg(e,sid){
   const file=e.target.files[0];if(!file)return;
