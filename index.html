@@ -45,6 +45,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .mi img{width:100%;height:100%;object-fit:cover;transition:transform .2s}
 .mi:hover img{transform:scale(1.05)}
 .ct{position:absolute;bottom:5px;left:5px;background:rgba(0,0,0,.6);color:#fff;font-size:8px;padding:2px 6px;border-radius:4px;font-family:monospace}
+.logo-wm{position:absolute;bottom:4px;right:4px;width:22px;height:22px;border-radius:50%;object-fit:cover;opacity:0.7;pointer-events:none}
 .em{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px;color:var(--t3);gap:10px;text-align:center}
 .mb2{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:200;align-items:flex-end;justify-content:center}
 .mb2.open{display:flex}
@@ -191,7 +192,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     <div style="position:relative;overflow:hidden;background:linear-gradient(160deg,#1a3a2a 0%,#2d5a3d 50%,#1a4a5a 100%);padding:48px 24px 36px;text-align:center">
       <!-- subtle dots pattern -->
       <div style="position:absolute;inset:0;opacity:0.08" id="hero-dots"></div>
-      <div style="font-size:48px;margin-bottom:12px">🌍</div>
+      <img src="logo.jpg" alt="ArtNest Cares" style="width:80px;height:80px;border-radius:50%;object-fit:cover;margin-bottom:12px;border:3px solid rgba(255,255,255,0.3);box-shadow:0 4px 20px rgba(0,0,0,0.3)"/>
       <div style="font-size:11px;font-weight:700;letter-spacing:3px;color:#7dd3a8;margin-bottom:10px;text-transform:uppercase">Our Mission</div>
       <h1 style="font-size:22px;font-weight:800;color:#fff;line-height:1.4;margin-bottom:12px">每一笔童真<br/>都能点亮一个孩子的明天</h1>
       <p style="font-size:13px;color:rgba(255,255,255,0.75);line-height:1.7;max-width:320px;margin:0 auto 20px">画巢相信，孩子的画作不只是家庭的珍藏，<br/>更是改变世界的力量。</p>
@@ -519,7 +520,7 @@ function renderMuseum(){
   em.style.display='none';document.getElementById('ms').textContent=`共 ${arts.length} 件作品`;
   arts.forEach(a=>{
     const el=document.createElement('div');el.className='mi';el.onclick=()=>openDetail(a.id);
-    el.innerHTML=`<img src="${a.imageData}" alt="${a.title}" loading="lazy"/><div class="ct">${a.chainId.slice(0,8)}…</div>`;g.appendChild(el);
+    el.innerHTML=`<img src="${a.imageData}" alt="${a.title}" loading="lazy"/><div class="ct">${a.chainId.slice(0,8)}…</div><img src="logo.jpg" class="logo-wm"/>`;g.appendChild(el);
   });
 }
 function renderDiscover(){
@@ -529,7 +530,7 @@ function renderDiscover(){
   const bgs=['#FAECE7','#E1F5EE','#E6F1FB','#FAEEDA','#FBEAF0','#EAF3DE'];
   flt.forEach(a=>{
     const c=document.createElement('div');c.className='wcard';c.onclick=()=>openDetail(a.id);
-    c.innerHTML=`<img src="${a.imageData}" loading="lazy" style="background:${bgs[a.id%6]}"/>
+    c.innerHTML=`<div style="position:relative"><img src="${a.imageData}" loading="lazy" style="background:${bgs[a.id%6]}"/><img src="logo.jpg" class="logo-wm"/></div>
       <div class="wci"><div class="wct">${a.title}</div><div class="wca">
       <div class="ar"><div class="avx" style="background:var(--coral)">我</div><span>小艺术家</span></div>
       <button class="sb ${a.starred?'starred':''}" onclick="toggleStar(event,${a.id})">⭐ ${a.stars}</button></div></div>`;
@@ -545,6 +546,7 @@ function renderShop(){
       <div class="si2" style="cursor:pointer" onclick="document.getElementById('shop-img-input-${s.id}').click()">
         <img id="shop-img-${s.id}" src="${s.thumb}" alt="${s.product}" style="width:100%;height:100%;object-fit:cover;display:block"/>
         <div class="sbg">${s.icon} ${s.product}</div>
+        <img src="logo.jpg" class="logo-wm"/>
         <div style="position:absolute;inset:0;background:rgba(0,0,0,0);display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .2s"
           onmouseenter="this.style.opacity=1;this.style.background='rgba(0,0,0,0.35)'"
           onmouseleave="this.style.opacity=0;this.style.background='rgba(0,0,0,0)'">
@@ -562,7 +564,7 @@ function renderProfile(){
   updateStats();const pg=document.getElementById('pg'),pe=document.getElementById('pe');pg.innerHTML='';
   if(!arts.length){pe.style.display='flex';return;}pe.style.display='none';
   arts.forEach(a=>{const el=document.createElement('div');el.className='mi';el.onclick=()=>openDetail(a.id);
-    el.innerHTML=`<img src="${a.imageData}" loading="lazy"/><div class="ct">${a.chainId.slice(0,8)}…</div>`;pg.appendChild(el);});
+    el.innerHTML=`<img src="${a.imageData}" loading="lazy"/><div class="ct">${a.chainId.slice(0,8)}…</div><img src="logo.jpg" class="logo-wm"/>`;pg.appendChild(el);});
   renderProfileShop();
 }
 function replaceShopImg(e,sid){
@@ -584,7 +586,7 @@ function renderProfileShop(){
   const g=document.createElement('div');g.style.cssText='display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:12px';
   shop.forEach(s=>{
     const c=document.createElement('div');c.className='sc';
-    c.innerHTML=`<div class="si2"><img src="${s.thumb}" alt="${s.product}" style="width:100%;height:100%;object-fit:cover;display:block"/><div class="sbg">${s.icon} ${s.product}</div></div>
+    c.innerHTML=`<div class="si2"><img src="${s.thumb}" alt="${s.product}" style="width:100%;height:100%;object-fit:cover;display:block"/><div class="sbg">${s.icon} ${s.product}</div><img src="logo.jpg" class="logo-wm"/></div>
       <div class="sif"><div class="sn">${s.artTitle} · ${s.product}</div><div class="sp">¥ ${s.price}</div><div class="ss">已售 ${s.sold} 件</div></div>`;
     g.appendChild(c);
   });
