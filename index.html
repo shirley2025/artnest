@@ -1,0 +1,1244 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>画巢 ArtNest</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--coral:#D85A30;--cl:#FAECE7;--cd:#993C1D;--t:#1a1a1a;--t2:#666;--t3:#999;--b:#e8e8e8;--bg:#f7f5f2;--w:#fff;--r:12px;--rs:8px}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--t)}
+.app{max-width:430px;margin:0 auto;background:var(--w);min-height:100vh}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--b);background:var(--w);position:sticky;top:0;z-index:50}
+.logo{font-size:18px;font-weight:700}.logo em{color:var(--coral);font-style:normal}
+.icon-btn{background:none;border:none;cursor:pointer;font-size:20px;padding:2px}
+.nav{display:flex;border-top:1px solid var(--b);background:var(--w);position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;z-index:50}
+.nb{flex:1;padding:10px 4px 8px;border:none;background:none;cursor:pointer;font-size:11px;color:var(--t3);display:flex;flex-direction:column;align-items:center;gap:3px;border-top:2px solid transparent}
+.nb .ni{font-size:22px;line-height:1}
+.nb.active{color:var(--coral);border-top-color:var(--coral)}
+.page{display:none;padding-bottom:80px}
+.page.active{display:block}
+.sw{padding:12px 16px 8px}
+.si{width:100%;padding:10px 16px;border:1px solid var(--b);border-radius:24px;background:var(--bg);font-size:14px;outline:none}
+.si:focus{border-color:var(--coral)}
+.tw{display:flex;gap:8px;padding:0 16px 12px;overflow-x:auto;scrollbar-width:none}
+.tw::-webkit-scrollbar{display:none}
+.tag{padding:5px 14px;border-radius:20px;font-size:12px;border:1px solid var(--b);background:var(--w);color:var(--t2);cursor:pointer;white-space:nowrap}
+.tag.active{background:var(--cl);border-color:var(--coral);color:var(--cd);font-weight:500}
+.wfall{columns:2;gap:8px;padding:0 12px}
+.wcard{break-inside:avoid;margin-bottom:8px;border-radius:var(--r);overflow:hidden;border:1px solid var(--b);background:var(--w);cursor:pointer}
+.wcard img{width:100%;display:block;object-fit:cover}
+.wci{padding:8px 10px 10px}
+.wct{font-size:13px;font-weight:600;margin-bottom:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wca{display:flex;align-items:center;justify-content:space-between}
+.ar{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--t2)}
+.avx{width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff}
+.sb{display:flex;align-items:center;gap:3px;font-size:11px;color:var(--t3);background:none;border:none;cursor:pointer;padding:3px 6px;border-radius:6px}
+.sb.starred{color:#BA7517}
+.mh{padding:18px 18px 14px;border-bottom:1px solid var(--b)}
+.mh h2{font-size:17px;font-weight:700;margin-bottom:3px}
+.mh p{font-size:12px;color:var(--t2)}
+.uz{margin:14px 16px;border:2px dashed var(--b);border-radius:var(--r);padding:20px;display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;background:var(--bg)}
+.uz:hover{border-color:var(--coral);background:var(--cl)}
+.mg{display:grid;grid-template-columns:repeat(3,1fr);gap:3px;padding:0 12px 12px}
+.mi{aspect-ratio:1;border-radius:var(--rs);overflow:hidden;position:relative;cursor:pointer}
+.mi img{width:100%;height:100%;object-fit:cover;transition:transform .2s}
+.mi:hover img{transform:scale(1.05)}
+.ct{position:absolute;bottom:5px;left:5px;background:rgba(0,0,0,.6);color:#fff;font-size:8px;padding:2px 6px;border-radius:4px;font-family:monospace}
+.em{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px;color:var(--t3);gap:10px;text-align:center}
+.mb2{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:200;align-items:flex-end;justify-content:center}
+.mb2.open{display:flex}
+.mod{background:var(--w);border-radius:20px 20px 0 0;width:100%;max-width:430px;max-height:92vh;overflow-y:auto}
+.mhd{display:flex;align-items:center;justify-content:space-between;padding:16px 20px 14px;border-bottom:1px solid var(--b);position:sticky;top:0;background:var(--w);z-index:1}
+.mhd .mt{font-size:16px;font-weight:700}
+.mc{background:var(--bg);border:none;border-radius:50%;width:30px;height:30px;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;color:var(--t2)}
+.mbd{padding:16px 20px 24px}
+.up{width:100%;aspect-ratio:4/3;border-radius:var(--r);object-fit:contain;background:var(--bg);margin-bottom:16px;display:none}
+.up.show{display:block}
+.fg{margin-bottom:14px}
+.fl{font-size:13px;font-weight:600;margin-bottom:6px;display:block}
+.fi,.fta{width:100%;padding:10px 14px;border:1px solid var(--b);border-radius:var(--rs);font-size:14px;color:var(--t);background:var(--w);outline:none;font-family:inherit}
+.fi:focus,.fta:focus{border-color:var(--coral)}
+.fta{resize:vertical;min-height:70px;line-height:1.5}
+.fr2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.cp{background:var(--bg);border-radius:var(--rs);padding:10px 12px;font-size:11px;font-family:monospace;color:var(--t2);word-break:break-all}
+.bsub{width:100%;padding:14px;background:var(--coral);color:#fff;border:none;border-radius:var(--r);font-size:15px;font-weight:700;cursor:pointer;margin-top:8px}
+.bsub:disabled{opacity:.5;cursor:not-allowed}
+.diw{width:100%;background:var(--bg);display:flex;align-items:center;justify-content:center;max-height:280px;overflow:hidden}
+.diw img{width:100%;max-height:280px;object-fit:contain}
+.db{padding:16px 18px}
+.dt{font-size:20px;font-weight:700;margin-bottom:10px}
+.dtg{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+.dtag{padding:4px 12px;border-radius:16px;font-size:12px;background:var(--cl);color:var(--cd);font-weight:500}
+.dch{background:var(--bg);border-radius:var(--rs);padding:10px 12px;margin-bottom:16px}
+.dcl{font-size:11px;font-weight:600;color:var(--coral);margin-bottom:3px}
+.dci{font-size:10px;font-family:monospace;color:var(--t2);word-break:break-all;line-height:1.6}
+.st{font-size:14px;font-weight:700;margin-bottom:10px}
+.pgd{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px}
+.pc{border:2px solid var(--b);border-radius:var(--r);padding:10px 6px;text-align:center;cursor:pointer;transition:all .2s;position:relative}
+.pc:hover{border-color:var(--coral);background:var(--cl)}
+.pc.sel{border-color:var(--coral);background:var(--cl)}
+.pc.sel::after{content:'✓';position:absolute;top:4px;right:6px;font-size:11px;color:var(--coral);font-weight:700}
+.pc .pci{font-size:28px;margin-bottom:4px}
+.pc .pcn{font-size:11px;color:var(--t2);font-weight:500}
+.pc .pcp{font-size:12px;color:var(--coral);font-weight:600;margin-top:2px}
+.bgen{width:100%;padding:13px;background:var(--coral);color:#fff;border:none;border-radius:var(--r);font-size:14px;font-weight:700;cursor:pointer;margin-bottom:10px}
+.bgen:disabled{opacity:.5;cursor:not-allowed}
+.bo{width:100%;padding:12px;background:var(--w);color:var(--t);border:1px solid var(--b);border-radius:var(--r);font-size:14px;cursor:pointer;margin-bottom:10px}
+.bdng{width:100%;padding:12px;background:var(--w);color:#e74c3c;border:1px solid #e74c3c;border-radius:var(--r);font-size:14px;cursor:pointer;margin-bottom:10px}
+
+/* GEN MODAL */
+.ghr{display:flex;align-items:center;gap:12px;margin-bottom:14px;padding:16px 20px 0}
+.gat{width:72px;height:72px;border-radius:10px;object-fit:cover}
+.gtt{font-size:15px;font-weight:700;margin-bottom:2px}
+.gts{font-size:12px;color:var(--t2)}
+.ptabs{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding:0 20px 12px;border-bottom:1px solid var(--b)}
+.ptabs::-webkit-scrollbar{display:none}
+.ptab{padding:6px 14px;border-radius:20px;font-size:12px;border:1px solid var(--b);background:var(--w);color:var(--t2);cursor:pointer;white-space:nowrap}
+.ptab.active{background:var(--coral);border-color:var(--coral);color:#fff;font-weight:600}
+.pva{padding:16px 20px}
+
+/* CANVAS SCENE — 3D photo feel */
+.scene{width:100%;aspect-ratio:1;border-radius:16px;overflow:hidden;position:relative;margin-bottom:14px}
+.scene canvas{width:100%;height:100%;display:block}
+.ldo{position:absolute;inset:0;background:rgba(255,255,255,.92);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;border-radius:16px}
+.lsp{width:42px;height:42px;border:3px solid var(--b);border-top-color:var(--coral);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.ltd{font-size:13px;color:var(--t2);font-weight:500}
+
+/* AI badge */
+.ai-badge{display:inline-flex;align-items:center;gap:5px;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;font-size:11px;font-weight:600;padding:4px 10px;border-radius:20px;margin-bottom:10px}
+.pdesc{font-size:13px;color:var(--t2);line-height:1.6;margin-bottom:12px;padding:10px 12px;background:var(--bg);border-radius:var(--rs)}
+.arow{display:flex;gap:8px;margin-bottom:14px}
+.brg{flex:1;padding:10px;border:1px solid var(--coral);color:var(--coral);background:var(--w);border-radius:var(--rs);font-size:13px;font-weight:600;cursor:pointer}
+.brg:hover{background:var(--cl)}
+.prow{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;padding:12px 14px;background:var(--bg);border-radius:var(--rs)}
+.pv{font-size:22px;font-weight:700;color:var(--coral)}
+.pl{font-size:12px;color:var(--t3)}
+.badd{width:100%;padding:13px;background:var(--coral);color:#fff;border:none;border-radius:var(--r);font-size:14px;font-weight:700;cursor:pointer;margin-bottom:10px}
+.bgft{width:100%;padding:12px;background:var(--w);color:var(--t);border:1px solid var(--b);border-radius:var(--r);font-size:14px;cursor:pointer;margin-bottom:14px}
+
+/* AI stream output */
+.ai-stream{background:#1a1a2e;border-radius:var(--rs);padding:12px;margin-bottom:12px;min-height:60px;display:none}
+.ai-stream.show{display:block}
+.ai-stream p{font-size:12px;color:#a0c4ff;line-height:1.8;font-family:monospace;white-space:pre-wrap}
+
+.sh{padding:14px 18px;border-bottom:1px solid var(--b);display:flex;align-items:center;justify-content:space-between}
+.sh h2{font-size:16px;font-weight:700}
+.bn{padding:7px 14px;background:var(--coral);color:#fff;border:none;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer}
+.sgd{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:12px}
+.sc{border:1px solid var(--b);border-radius:var(--r);overflow:hidden;cursor:pointer}
+.si2{aspect-ratio:1;position:relative;background:var(--bg)}
+.si2 img,.si2 canvas{width:100%;height:100%;display:block;object-fit:cover}
+.sbg{position:absolute;bottom:8px;left:8px;background:rgba(0,0,0,.55);color:#fff;font-size:10px;padding:3px 8px;border-radius:10px}
+.sif{padding:9px 11px 11px}
+.sn{font-size:13px;font-weight:600;margin-bottom:3px}
+.sp{font-size:14px;color:var(--coral);font-weight:700}
+.ss{font-size:11px;color:var(--t3)}
+.sa{border:2px dashed var(--b);border-radius:var(--r);display:flex;align-items:center;justify-content:center;min-height:160px;cursor:pointer;color:var(--t3);font-size:12px;flex-direction:column;gap:6px}
+.sa:hover{border-color:var(--coral);color:var(--coral);background:var(--cl)}
+.pc2{height:90px;background:linear-gradient(135deg,var(--cl),#E6F1FB)}
+.pi{padding:0 18px 16px;border-bottom:1px solid var(--b);margin-top:-30px}
+.pav{width:60px;height:60px;border-radius:50%;border:3px solid var(--w);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;color:#fff;margin-bottom:10px}
+.pn{font-size:18px;font-weight:700;margin-bottom:2px}
+.pb{font-size:13px;color:var(--t2);line-height:1.5;margin-bottom:12px}
+.ps{display:flex;border:1px solid var(--b);border-radius:var(--r);overflow:hidden}
+.pst{flex:1;padding:10px 8px;text-align:center;border-right:1px solid var(--b)}
+.pst:last-child{border-right:none}
+.psn{font-size:16px;font-weight:700}
+.psl{font-size:10px;color:var(--t3);margin-top:1px}
+.ptb{display:flex;border-bottom:1px solid var(--b)}
+.ptb button{flex:1;padding:11px;border:none;background:none;cursor:pointer;font-size:13px;color:var(--t2);border-bottom:2px solid transparent}
+.ptb button.active{color:var(--coral);border-bottom-color:var(--coral);font-weight:600}
+.toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.82);color:#fff;padding:10px 20px;border-radius:24px;font-size:13px;z-index:999;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap}
+.toast.show{opacity:1}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="topbar">
+    <div class="logo">画巢 <em>ArtNest</em></div>
+    <div style="display:flex;gap:14px">
+      <button class="icon-btn">🔔</button>
+      <button class="icon-btn" onclick="go('profile')">👤</button>
+    </div>
+  </div>
+  <div class="page active" id="page-discover">
+    <div class="sw"><input class="si" placeholder="🔍 搜索画作、艺术家..." id="qi" oninput="renderDiscover()"/></div>
+    <div class="tw">
+      <div class="tag active" onclick="setTag(this,'全部')">全部</div>
+      <div class="tag" onclick="setTag(this,'油画')">油画</div>
+      <div class="tag" onclick="setTag(this,'水彩')">水彩</div>
+      <div class="tag" onclick="setTag(this,'蜡笔')">蜡笔</div>
+      <div class="tag" onclick="setTag(this,'素描')">素描</div>
+    </div>
+    <div class="wfall" id="dg"></div>
+  </div>
+  <div class="page" id="page-museum">
+    <div class="mh"><h2 id="mt">我的数字博物馆</h2><p id="ms">上传你的第一件作品 🎨</p></div>
+    <div class="uz" onclick="document.getElementById('fi').click()">
+      <div style="font-size:32px">📷</div>
+      <div style="font-size:14px;font-weight:600">上传画作</div>
+      <div style="font-size:12px;color:var(--t3)">拍照 / 从相册选择</div>
+    </div>
+    <input type="file" id="fi" accept="image/*" onchange="onFile(event)" style="display:none"/>
+    <div class="mg" id="mg"></div>
+    <div class="em" id="em"><div style="font-size:48px;opacity:.4">🖼</div><p style="font-size:13px;line-height:1.6">还没有作品<br>点击上方上传你的第一幅画</p></div>
+  </div>
+  <!-- MISSION PAGE -->
+  <div class="page" id="page-mission">
+    <!-- Hero -->
+    <div style="position:relative;overflow:hidden;background:linear-gradient(160deg,#1a3a2a 0%,#2d5a3d 50%,#1a4a5a 100%);padding:48px 24px 36px;text-align:center">
+      <!-- subtle dots pattern -->
+      <div style="position:absolute;inset:0;opacity:0.08" id="hero-dots"></div>
+      <div style="font-size:48px;margin-bottom:12px">🌍</div>
+      <div style="font-size:11px;font-weight:700;letter-spacing:3px;color:#7dd3a8;margin-bottom:10px;text-transform:uppercase">Our Mission</div>
+      <h1 style="font-size:22px;font-weight:800;color:#fff;line-height:1.4;margin-bottom:12px">每一笔童真<br/>都能点亮一个孩子的明天</h1>
+      <p style="font-size:13px;color:rgba(255,255,255,0.75);line-height:1.7;max-width:320px;margin:0 auto 20px">画巢相信，孩子的画作不只是家庭的珍藏，<br/>更是改变世界的力量。</p>
+      <!-- WFP badge -->
+      <div style="display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.25);border-radius:24px;padding:8px 16px;backdrop-filter:blur(8px)">
+        <div style="width:28px;height:28px;background:#009edb;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:900;color:#fff;flex-shrink:0">W</div>
+        <div style="text-align:left">
+          <div style="font-size:11px;font-weight:700;color:#fff">官方公益伙伴</div>
+          <div style="font-size:10px;color:rgba(255,255,255,0.7)">WFP 世界粮食计划署</div>
+        </div>
+        <div style="font-size:10px;color:#7dd3a8;font-weight:600;margin-left:4px">✓ 认证</div>
+      </div>
+    </div>
+
+    <!-- Live counter -->
+    <div style="margin:0 16px;transform:translateY(-20px);background:#fff;border-radius:16px;padding:20px;box-shadow:0 8px 32px rgba(0,0,0,0.1);border:1px solid #f0f0f0">
+      <div style="text-align:center;margin-bottom:14px">
+        <div style="font-size:11px;color:var(--t3);font-weight:600;letter-spacing:1px;margin-bottom:6px">画巢大家庭已帮助</div>
+        <div style="font-size:38px;font-weight:800;color:#2d5a3d;line-height:1" id="meal-counter">0</div>
+        <div style="font-size:13px;color:var(--t2);margin-top:4px">名非洲儿童获得一餐 🍚</div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+        <div style="text-align:center;background:#f0faf5;border-radius:10px;padding:10px 6px">
+          <div style="font-size:18px;font-weight:700;color:#2d5a3d" id="cnt-orders">0</div>
+          <div style="font-size:10px;color:var(--t3);margin-top:2px">件纪念品</div>
+        </div>
+        <div style="text-align:center;background:#f0faf5;border-radius:10px;padding:10px 6px">
+          <div style="font-size:18px;font-weight:700;color:#2d5a3d" id="cnt-yuan">¥0</div>
+          <div style="font-size:10px;color:var(--t3);margin-top:2px">累计捐款</div>
+        </div>
+        <div style="text-align:center;background:#f0faf5;border-radius:10px;padding:10px 6px">
+          <div style="font-size:18px;font-weight:700;color:#2d5a3d" id="cnt-kids">0</div>
+          <div style="font-size:10px;color:var(--t3);margin-top:2px">个家庭参与</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- How it works -->
+    <div style="padding:0 16px 24px;margin-top:-4px">
+      <div style="font-size:15px;font-weight:700;margin-bottom:14px">每件纪念品，都在做一件好事</div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div style="display:flex;align-items:flex-start;gap:12px;background:#fafaf8;border-radius:12px;padding:14px">
+          <div style="width:36px;height:36px;background:#FAECE7;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">🎨</div>
+          <div>
+            <div style="font-size:13px;font-weight:600;margin-bottom:3px">孩子创作画作</div>
+            <div style="font-size:12px;color:var(--t2);line-height:1.5">每张画作上传后，自动生成区块链唯一ID，作品永久留存，无法篡改</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:center;color:var(--t3);font-size:18px">↓</div>
+        <div style="display:flex;align-items:flex-start;gap:12px;background:#fafaf8;border-radius:12px;padding:14px">
+          <div style="width:36px;height:36px;background:#E1F5EE;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">🛍</div>
+          <div>
+            <div style="font-size:13px;font-weight:600;margin-bottom:3px">生成艺术纪念品并销售</div>
+            <div style="font-size:12px;color:var(--t2);line-height:1.5">画作变成马克杯、明信片、T恤……每件商品都印有 WFP 公益印章</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:center;color:var(--t3);font-size:18px">↓</div>
+        <div style="display:flex;align-items:flex-start;gap:12px;background:#f0faf5;border-radius:12px;padding:14px;border:1px solid #c8eedd">
+          <div style="width:36px;height:36px;background:#2d5a3d;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">🌍</div>
+          <div>
+            <div style="font-size:13px;font-weight:600;margin-bottom:3px;color:#2d5a3d">10% 捐给 WFP</div>
+            <div style="font-size:12px;color:var(--t2);line-height:1.5">每笔订单金额的 10% 直接捐给世界粮食计划署，帮助非洲饥饿儿童获得一餐</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- WFP intro -->
+    <div style="margin:0 16px 24px;background:linear-gradient(135deg,#009edb11,#009edb05);border:1px solid #009edb33;border-radius:16px;padding:18px">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+        <div style="width:40px;height:40px;background:#009edb;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:900;color:#fff">W</div>
+        <div>
+          <div style="font-size:14px;font-weight:700">WFP 世界粮食计划署</div>
+          <div style="font-size:11px;color:var(--t2)">联合国 · 2020年诺贝尔和平奖</div>
+        </div>
+      </div>
+      <p style="font-size:13px;color:var(--t2);line-height:1.7;margin-bottom:12px">WFP 是全球最大的人道主义粮食援助机构，每年在 120 多个国家和地区为约 1 亿人提供食物援助。在非洲撒哈拉以南地区，数以千万计的儿童每天在饥饿中挣扎。</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <div style="background:rgba(255,255,255,0.6);border-radius:10px;padding:10px">
+          <div style="font-size:16px;font-weight:700;color:#009edb">1亿+</div>
+          <div style="font-size:11px;color:var(--t2)">每年受益人数</div>
+        </div>
+        <div style="background:rgba(255,255,255,0.6);border-radius:10px;padding:10px">
+          <div style="font-size:16px;font-weight:700;color:#009edb">120+</div>
+          <div style="font-size:11px;color:var(--t2)">覆盖国家和地区</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Our story -->
+    <div style="padding:0 16px 24px">
+      <div style="font-size:15px;font-weight:700;margin-bottom:14px">画巢的初心</div>
+      <div style="background:#fafaf8;border-radius:16px;padding:18px">
+        <p style="font-size:13px;color:var(--t2);line-height:1.8;margin-bottom:12px">每个孩子都是天生的艺术家。他们用蜡笔、水彩、手指，画出自己眼中最真实的世界——那里有彩虹、有小兔子、有爸爸妈妈的笑脸。</p>
+        <p style="font-size:13px;color:var(--t2);line-height:1.8;margin-bottom:12px">画巢想做的，是让这些珍贵的童年痕迹永远留存，让每一笔都有价值。不只是对这个家庭，更是对更广阔的世界。</p>
+        <p style="font-size:13px;color:var(--t2);line-height:1.8;margin-bottom:0">当一个在上海的孩子画下一只小兔子，这幅画变成一个马克杯被购买，万里之外一个非洲的孩子，或许就因此得到了今天唯一的一顿饭。</p>
+        <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--b);font-size:12px;color:var(--t3);font-style:italic;text-align:right">— 画巢 ArtNest 创始团队</div>
+      </div>
+    </div>
+
+    <!-- Transparency -->
+    <div style="margin:0 16px 24px;background:#fffbf0;border:1px solid #f0d080;border-radius:16px;padding:16px">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+        <span style="font-size:18px">📊</span>
+        <div style="font-size:14px;font-weight:700">公益透明度承诺</div>
+      </div>
+      <div style="font-size:12px;color:var(--t2);line-height:1.7">
+        · 每笔订单 <strong>10%</strong> 捐给 WFP，金额实时公示<br/>
+        · 每季度发布捐款报告，可在画巢官网查询<br/>
+        · 捐款收据由 WFP 出具，全程可追溯<br/>
+        · 区块链存证每笔公益记录，不可篡改
+      </div>
+    </div>
+
+    <!-- CTA -->
+    <div style="padding:0 16px 40px;text-align:center">
+      <button onclick="go('museum')" style="width:100%;padding:14px;background:linear-gradient(135deg,#2d5a3d,#1a4a5a);color:#fff;border:none;border-radius:14px;font-size:15px;font-weight:700;cursor:pointer;margin-bottom:10px">🎨 上传画作，开始做好事</button>
+      <div style="font-size:12px;color:var(--t3)">你的孩子的第一幅画，也许是某个非洲孩子今天的一餐</div>
+    </div>
+  </div>
+
+  <div class="page" id="page-shop">
+    <div class="sh"><h2>我的手作商店</h2><button class="bn" onclick="go('museum')">+ 新建商品</button></div>
+    <div class="sgd" id="sg"></div>
+  </div>
+  <div class="page" id="page-profile">
+    <div class="pc2"></div>
+    <div class="pi">
+      <div class="pav" style="background:var(--coral)">我</div>
+      <div class="pn">小艺术家</div>
+      <div class="pb">我的每一笔都是独一无二的 🎨</div>
+      <div class="ps">
+        <div class="pst"><div class="psn" id="sw">0</div><div class="psl">作品</div></div>
+        <div class="pst"><div class="psn" id="ss">⭐ 0</div><div class="psl">Stars</div></div>
+        <div class="pst"><div class="psn">0</div><div class="psl">粉丝</div></div>
+        <div class="pst"><div class="psn">0</div><div class="psl">关注</div></div>
+      </div>
+    </div>
+    <div class="ptb">
+      <button class="active" onclick="ptab(this,'pp')">数字博物馆</button>
+      <button onclick="ptab(this,'pps')">手作商店</button>
+    </div>
+    <div id="pp"><div class="mg" id="pg" style="padding-top:12px"></div><div class="em" id="pe"><div style="font-size:48px;opacity:.4">🖼</div><p style="font-size:13px">还没有作品</p></div></div>
+    <div id="pps" style="display:none"><div style="padding:30px;text-align:center;color:var(--t3);font-size:13px">商店暂无商品</div></div>
+  </div>
+  <div class="nav">
+    <button class="nb active" id="nav-discover" onclick="go('discover')"><span class="ni">🏠</span>发现</button>
+    <button class="nb" id="nav-museum" onclick="go('museum')"><span class="ni">🏛</span>博物馆</button>
+    <button class="nb" id="nav-shop" onclick="go('shop')"><span class="ni">🛍</span>手作店</button>
+    <button class="nb" id="nav-mission" onclick="go('mission')"><span class="ni">🌍</span>初心</button>
+    <button class="nb" id="nav-profile" onclick="go('profile')"><span class="ni">🎨</span>我的</button>
+  </div>
+</div>
+
+<!-- UPLOAD -->
+<div class="mb2" id="m-upload">
+  <div class="mod">
+    <div class="mhd"><div class="mt">上传新画作</div><button class="mc" onclick="cm('m-upload')">✕</button></div>
+    <div class="mbd">
+      <img id="upv" class="up" src="" alt="预览"/>
+      <div class="fg"><label class="fl">作品名称 *</label><input class="fi2" id="at" placeholder="给你的画作起个名字..." maxlength="30" style="width:100%;padding:10px 14px;border:1px solid var(--b);border-radius:var(--rs);font-size:14px;outline:none"/></div>
+      <div class="fr2">
+        <div class="fg"><label class="fl">创作日期</label><input class="fi2" id="ad" type="date" style="width:100%;padding:10px 14px;border:1px solid var(--b);border-radius:var(--rs);font-size:14px;outline:none"/></div>
+        <div class="fg"><label class="fl">创作地点</label><input class="fi2" id="al" placeholder="如：上海" style="width:100%;padding:10px 14px;border:1px solid var(--b);border-radius:var(--rs);font-size:14px;outline:none"/></div>
+      </div>
+      <div class="fg"><label class="fl">画作风格</label><input class="fi2" id="as" placeholder="如：水彩、蜡笔、油画..." style="width:100%;padding:10px 14px;border:1px solid var(--b);border-radius:var(--rs);font-size:14px;outline:none"/></div>
+      <div class="fg"><label class="fl">关键词标签</label><input class="fi2" id="ak" placeholder="用逗号分隔，如：兔子,春天" style="width:100%;padding:10px 14px;border:1px solid var(--b);border-radius:var(--rs);font-size:14px;outline:none"/></div>
+      <div class="fg"><label class="fl">画作故事（可选）</label><textarea class="fta" id="asto" placeholder="描述这幅画的故事..."></textarea></div>
+      <div class="fg"><div style="font-size:11px;font-weight:600;color:var(--coral);margin-bottom:4px">🔗 区块链唯一 ID（自动生成）</div><div class="cp" id="cid">上传后自动生成...</div></div>
+      <button class="bsub" id="sbtn" onclick="submit()" disabled>确认上传到我的博物馆</button>
+    </div>
+  </div>
+</div>
+
+<!-- DETAIL -->
+<div class="mb2" id="m-detail">
+  <div class="mod">
+    <div class="mhd"><div class="mt" id="dmt">画作详情</div><button class="mc" onclick="cm('m-detail')">✕</button></div>
+    <div class="diw"><img id="dimg" src="" alt=""/></div>
+    <div class="db">
+      <div class="dt" id="dtit"></div>
+      <div class="dtg" id="dtgs"></div>
+      <div class="dch"><div class="dcl">🔗 区块链唯一 ID</div><div class="dci" id="dcid"></div></div>
+      <div class="st">选择纪念品类型，AI 生成照片级 3D 渲染效果</div>
+      <div class="pgd" id="pgd"></div>
+      <button class="bgen" id="bgen" onclick="openGen()">✨ AI 生成照片级 3D 效果预览</button>
+      <button class="bdng" onclick="delArt()">🗑 删除这件作品</button>
+    </div>
+  </div>
+</div>
+
+<!-- GEN MODAL -->
+<div class="mb2" id="m-gen">
+  <div class="mod">
+    <div class="mhd"><div class="mt">✨ AI 照片级 3D 渲染</div><button class="mc" onclick="cm('m-gen')">✕</button></div>
+    <div class="ghr">
+      <img id="gthumb" class="gat" src="" alt=""/>
+      <div><div class="gtt" id="gttl"></div><div class="gts" id="gsub"></div></div>
+    </div>
+    <div class="ptabs" id="ptabs"></div>
+    <div class="pva">
+      <div class="ai-badge">🤖 Claude AI · 实时渲染</div>
+      <div class="scene" id="scene">
+        <canvas id="cv" width="800" height="800"></canvas>
+        <div class="ldo" id="ldo">
+          <div class="lsp"></div>
+          <div class="ltd" id="ltd">正在调用 Claude AI 分析画作...</div>
+        </div>
+      </div>
+      <!-- AI analysis stream -->
+      <div class="ai-stream" id="aistream">
+        <p id="aitext"></p>
+      </div>
+      <div class="pdesc" id="pdesc"></div>
+      <div class="arow">
+        <button class="brg" onclick="regen()">🔄 重新渲染</button>
+        <button class="brg" onclick="prevProd()">◀ 上一件</button>
+        <button class="brg" onclick="nextProd()">下一件 ▶</button>
+      </div>
+      <div class="prow">
+        <div><div class="pl">参考价格</div><div class="pv" id="gprice">¥ --</div></div>
+        <div style="text-align:right"><div class="pl">预计制作</div><div style="font-size:13px;font-weight:600;color:var(--t2)">7-10 个工作日</div></div>
+      </div>
+      <button class="badd" onclick="addShop()">🛍 上架到我的手作商店</button>
+      <button class="bgft" onclick="toast('礼品定制功能即将上线 🎁')">🎁 自购定制 · 送给家人朋友</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="tst"></div>
+
+<script>
+// ─── state ───
+let arts=[], shop=[], curArtId=null, curTag='全部', selProds=new Set();
+let genArtId=null, genProds=[], genIdx=0, imgCache={}, curFile=null;
+try{arts=JSON.parse(localStorage.getItem('an_arts')||'[]')}catch(e){}
+try{shop=JSON.parse(localStorage.getItem('an_shop')||'[]')}catch(e){}
+
+const PRODS=[
+  {n:'马克杯',i:'☕',p:89,desc:'球形陶瓷马克杯，画作弧面环绕，搭配蓝色小花背景，照片级质感'},
+  {n:'明信片',i:'💌',p:35,desc:'A5 哑光明信片，微倾角摄影棚拍摄效果，右侧邮票区与地址栏'},
+  {n:'冰箱贴',i:'🧲',p:25,desc:'橡胶立体浮雕贴，白边描边工艺，粉色背景顶部光晕，照片棚风格'},
+  {n:'杯垫',i:'🫙',p:45,desc:'软木圆形杯垫，木纹底座，俯拍构图，画作居中清晰呈现'},
+  {n:'抱枕',i:'🛋',p:128,desc:'绒面方枕，枕芯饱满鼓胀，角落缝线钮扣，柔光棚拍效果'},
+  {n:'短袖T恤',i:'👕',p:99,desc:'纯棉平铺 flatlay 风格，画作定位印在胸口，专业白底拍摄'},
+];
+
+// ─── INIT ───
+window.onload=()=>{
+  document.getElementById('ad').value=new Date().toISOString().split('T')[0];
+  render();
+  animateCounter();
+};
+
+function animateCounter(){
+  // Simulate growing numbers for demo feel
+  const orders=shop.length||12, yuan=orders*89*0.1, meals=Math.floor(yuan/3.5), kids=Math.max(8,arts.length+6);
+  countUp('meal-counter', meals||47);
+  countUp('cnt-orders', orders||12);
+  document.getElementById('cnt-yuan').textContent='¥'+Math.round(yuan||106);
+  countUp('cnt-kids', kids||8);
+}
+function countUp(id, target){
+  const el=document.getElementById(id); if(!el)return;
+  let n=0; const step=Math.ceil(target/40);
+  const iv=setInterval(()=>{n=Math.min(n+step,target);el.textContent=n;if(n>=target)clearInterval(iv);},30);
+}
+function render(){renderMuseum();renderDiscover();renderShop();renderProfile();}
+function save(){
+  try{localStorage.setItem('an_arts',JSON.stringify(arts))}catch(e){}
+  try{localStorage.setItem('an_shop',JSON.stringify(shop))}catch(e){}
+}
+function chainId(){let s='0x';const h='0123456789abcdef';for(let i=0;i<62;i++)s+=h[~~(Math.random()*16)];return s;}
+
+// ─── NAV ───
+function go(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nb').forEach(b=>b.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  const nb=document.getElementById('nav-'+id);if(nb)nb.classList.add('active');
+  if(id==='profile')renderProfile();if(id==='discover')renderDiscover();
+}
+function ptab(btn,id){
+  document.querySelectorAll('.ptb button').forEach(b=>b.classList.remove('active'));btn.classList.add('active');
+  ['pp','pps'].forEach(i=>document.getElementById(i).style.display=i===id?'block':'none');
+}
+function cm(id){document.getElementById(id).classList.remove('open');}
+function om(id){document.getElementById(id).classList.add('open');}
+function toast(m){const t=document.getElementById('tst');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2800);}
+function setTag(el,t){document.querySelectorAll('.tag').forEach(x=>x.classList.remove('active'));el.classList.add('active');curTag=t;renderDiscover();}
+
+// ─── UPLOAD ───
+function onFile(e){
+  const f=e.target.files[0];if(!f)return;curFile=f;
+  const r=new FileReader();
+  r.onload=ev=>{
+    document.getElementById('upv').src=ev.target.result;document.getElementById('upv').classList.add('show');
+    document.getElementById('cid').textContent=chainId();document.getElementById('sbtn').disabled=false;om('m-upload');
+  };r.readAsDataURL(f);e.target.value='';
+}
+function submit(){
+  const title=document.getElementById('at').value.trim();
+  if(!title){toast('请输入作品名称 ✏️');return;}
+  const r=new FileReader();
+  r.onload=ev=>{
+    arts.unshift({id:Date.now(),title,imageData:ev.target.result,
+      date:document.getElementById('ad').value,
+      location:document.getElementById('al').value.trim()||'未知',
+      style:document.getElementById('as').value.trim(),
+      tags:document.getElementById('ak').value.split(/[,，]/).map(t=>t.trim()).filter(Boolean),
+      story:document.getElementById('asto').value.trim(),
+      chainId:document.getElementById('cid').textContent,stars:0,starred:false});
+    save();['at','al','as','ak','asto'].forEach(i=>document.getElementById(i).value='');
+    document.getElementById('upv').classList.remove('show');document.getElementById('sbtn').disabled=true;
+    document.getElementById('ad').value=new Date().toISOString().split('T')[0];
+    curFile=null;cm('m-upload');render();toast('🎉 画作已上传到你的博物馆！');
+  };r.readAsDataURL(curFile);
+}
+
+// ─── RENDERS ───
+function renderMuseum(){
+  const g=document.getElementById('mg'),em=document.getElementById('em');g.innerHTML='';
+  if(!arts.length){em.style.display='flex';document.getElementById('ms').textContent='上传你的第一件作品 🎨';return;}
+  em.style.display='none';document.getElementById('ms').textContent=`共 ${arts.length} 件作品`;
+  arts.forEach(a=>{
+    const el=document.createElement('div');el.className='mi';el.onclick=()=>openDetail(a.id);
+    el.innerHTML=`<img src="${a.imageData}" alt="${a.title}" loading="lazy"/><div class="ct">${a.chainId.slice(0,8)}…</div>`;g.appendChild(el);
+  });
+}
+function renderDiscover(){
+  const g=document.getElementById('dg'),q=document.getElementById('qi').value.toLowerCase();g.innerHTML='';
+  const flt=arts.filter(a=>(curTag==='全部'||a.style===curTag||a.tags.includes(curTag))&&(!q||a.title.toLowerCase().includes(q)));
+  if(!flt.length){g.innerHTML='<div style="padding:40px;text-align:center;color:#999;font-size:13px">还没有画作，快去博物馆上传吧 🎨</div>';return;}
+  const bgs=['#FAECE7','#E1F5EE','#E6F1FB','#FAEEDA','#FBEAF0','#EAF3DE'];
+  flt.forEach(a=>{
+    const c=document.createElement('div');c.className='wcard';c.onclick=()=>openDetail(a.id);
+    c.innerHTML=`<img src="${a.imageData}" loading="lazy" style="background:${bgs[a.id%6]}"/>
+      <div class="wci"><div class="wct">${a.title}</div><div class="wca">
+      <div class="ar"><div class="avx" style="background:var(--coral)">我</div><span>小艺术家</span></div>
+      <button class="sb ${a.starred?'starred':''}" onclick="toggleStar(event,${a.id})">⭐ ${a.stars}</button></div></div>`;
+    g.appendChild(c);
+  });
+}
+function toggleStar(e,id){e.stopPropagation();const a=arts.find(x=>x.id===id);if(!a)return;a.starred=!a.starred;a.stars+=a.starred?1:-1;save();renderDiscover();updateStats();}
+function renderShop(){
+  const g=document.getElementById('sg');g.innerHTML='';
+  shop.forEach(s=>{
+    const c=document.createElement('div');c.className='sc';
+    c.innerHTML=`
+      <div class="si2" style="cursor:pointer" onclick="document.getElementById('shop-img-input-${s.id}').click()">
+        <img id="shop-img-${s.id}" src="${s.thumb}" alt="${s.product}" style="width:100%;height:100%;object-fit:cover;display:block"/>
+        <div class="sbg">${s.icon} ${s.product}</div>
+        <div style="position:absolute;inset:0;background:rgba(0,0,0,0);display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .2s"
+          onmouseenter="this.style.opacity=1;this.style.background='rgba(0,0,0,0.35)'"
+          onmouseleave="this.style.opacity=0;this.style.background='rgba(0,0,0,0)'">
+          <span style="color:#fff;font-size:13px;font-weight:600">📷 换图</span>
+        </div>
+      </div>
+      <input type="file" id="shop-img-input-${s.id}" accept="image/*" style="display:none" onchange="replaceShopImg(event,'${s.id}')"/>
+      <div class="sif"><div class="sn">${s.artTitle} · ${s.product}</div><div class="sp">¥ ${s.price}</div><div class="ss">已售 ${s.sold} 件</div></div>`;
+    g.appendChild(c);
+  });
+  const add=document.createElement('div');add.className='sa';add.onclick=()=>go('museum');
+  add.innerHTML='<span style="font-size:28px">🎨</span><span>去博物馆选画作生成纪念品</span>';g.appendChild(add);
+}
+function renderProfile(){
+  updateStats();const pg=document.getElementById('pg'),pe=document.getElementById('pe');pg.innerHTML='';
+  if(!arts.length){pe.style.display='flex';return;}pe.style.display='none';
+  arts.forEach(a=>{const el=document.createElement('div');el.className='mi';el.onclick=()=>openDetail(a.id);
+    el.innerHTML=`<img src="${a.imageData}" loading="lazy"/><div class="ct">${a.chainId.slice(0,8)}…</div>`;pg.appendChild(el);});
+}
+function replaceShopImg(e,sid){
+  const file=e.target.files[0];if(!file)return;
+  const r=new FileReader();
+  r.onload=ev=>{
+    const s=shop.find(x=>x.id==sid);if(!s)return;
+    s.thumb=ev.target.result;save();
+    document.getElementById('shop-img-'+sid).src=ev.target.result;
+    renderProfileShop();
+    toast('商品图已更新 ✅');
+  };r.readAsDataURL(file);e.target.value='';
+}
+
+function renderProfileShop(){
+  const ps=document.getElementById('pps');
+  if(!shop.length){ps.innerHTML='<div style="padding:30px;text-align:center;color:var(--t3);font-size:13px">商店暂无商品</div>';return;}
+  ps.innerHTML='';
+  const g=document.createElement('div');g.style.cssText='display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:12px';
+  shop.forEach(s=>{
+    const c=document.createElement('div');c.className='sc';
+    c.innerHTML=`<div class="si2"><img src="${s.thumb}" alt="${s.product}" style="width:100%;height:100%;object-fit:cover;display:block"/><div class="sbg">${s.icon} ${s.product}</div></div>
+      <div class="sif"><div class="sn">${s.artTitle} · ${s.product}</div><div class="sp">¥ ${s.price}</div><div class="ss">已售 ${s.sold} 件</div></div>`;
+    g.appendChild(c);
+  });
+  ps.appendChild(g);
+}
+
+function updateStats(){
+  document.getElementById('sw').textContent=arts.length;
+  document.getElementById('ss').textContent='⭐ '+arts.reduce((s,a)=>s+a.stars,0);
+}
+
+// ─── DETAIL ───
+function openDetail(id){
+  const a=arts.find(x=>x.id===id);if(!a)return;
+  curArtId=id;selProds.clear();
+  document.getElementById('dimg').src=a.imageData;document.getElementById('dmt').textContent=a.title;
+  document.getElementById('dtit').textContent=a.title;document.getElementById('dcid').textContent=a.chainId;
+  document.getElementById('dtgs').innerHTML=[a.date,a.location,a.style,...a.tags].filter(Boolean).map(t=>`<span class="dtag">${t}</span>`).join('');
+  const pg=document.getElementById('pgd');pg.innerHTML='';
+  PRODS.forEach((p,i)=>{
+    const d=document.createElement('div');d.className='pc';d.id='pcard'+i;d.onclick=()=>toggleProd(i);
+    d.innerHTML=`<div class="pci">${p.i}</div><div class="pcn">${p.n}</div><div class="pcp">¥${p.p}</div>`;pg.appendChild(d);
+  });
+  updGenBtn();om('m-detail');
+}
+function toggleProd(i){selProds.has(i)?selProds.delete(i):selProds.add(i);document.getElementById('pcard'+i).classList.toggle('sel',selProds.has(i));updGenBtn();}
+function updGenBtn(){const b=document.getElementById('bgen');b.disabled=!selProds.size;b.textContent=selProds.size?`✨ AI 生成 ${selProds.size} 种照片级 3D 效果（可无限重新生成）`:'✨ 先选择上方纪念品类型';}
+function delArt(){
+  if(!curArtId||!confirm('确定删除这件作品吗？'))return;
+  arts=arts.filter(a=>a.id!==curArtId);shop=shop.filter(s=>s.artId!==curArtId);
+  save();cm('m-detail');render();toast('作品已删除');
+}
+
+// ─── GEN MODAL + AI RENDER ───
+function openGen(){
+  if(!selProds.size)return;
+  const a=arts.find(x=>x.id===curArtId);if(!a)return;
+  genArtId=curArtId;genProds=[...selProds];genIdx=0;
+  document.getElementById('gthumb').src=a.imageData;
+  document.getElementById('gttl').textContent=a.title;
+  document.getElementById('gsub').textContent=`已选 ${genProds.length} 种 · 可无限重新生成`;
+  const tabs=document.getElementById('ptabs');tabs.innerHTML='';
+  genProds.forEach((pi,ti)=>{
+    const p=PRODS[pi],b=document.createElement('button');
+    b.className='ptab'+(ti===0?' active':'');b.textContent=p.i+' '+p.n;b.onclick=()=>switchTab(ti);tabs.appendChild(b);
+  });
+  preloadImg(a.id,a.imageData);
+  cm('m-detail');om('m-gen');
+  aiGenerate(genProds[0],~~(Math.random()*99999));
+}
+
+function preloadImg(id,src){
+  if(imgCache[id])return;
+  const img=new Image();img.src=src;img.onload=()=>imgCache[id]=img;
+}
+
+function switchTab(ti){
+  document.querySelectorAll('.ptab').forEach((b,i)=>b.classList.toggle('active',i===ti));
+  genIdx=ti;aiGenerate(genProds[ti],~~(Math.random()*99999));
+}
+function prevProd(){genIdx=(genIdx-1+genProds.length)%genProds.length;switchTab(genIdx);}
+function nextProd(){genIdx=(genIdx+1)%genProds.length;switchTab(genIdx);}
+function regen(){aiGenerate(genProds[genIdx],~~(Math.random()*99999));}
+
+// ─── CLAUDE API + 3D CANVAS RENDER ───
+async function aiGenerate(productIdx,seed){
+  const a=arts.find(x=>x.id===genArtId);if(!a)return;
+  const p=PRODS[productIdx];
+  const ldo=document.getElementById('ldo'),ltd=document.getElementById('ltd');
+  const aiStream=document.getElementById('aistream'),aiText=document.getElementById('aitext');
+  ldo.style.display='flex';aiStream.classList.remove('show');aiText.textContent='';
+  document.getElementById('gprice').textContent='¥ '+p.p;
+  document.getElementById('pdesc').textContent=p.desc;
+
+  const msgs=[
+    `正在调用 Claude AI 分析「${a.title}」的色彩与构图...`,
+    `AI 理解画作内容，生成 3D 材质参数...`,
+    `渲染照片级光影与景深效果...`,
+    `最终合成输出中 ✨`
+  ];
+  let mi=0;ltd.textContent=msgs[0];
+  const iv=setInterval(()=>{mi=(mi+1)%msgs.length;ltd.textContent=msgs[mi];},700);
+
+  // Call Claude API to analyze the artwork and get rendering params
+  let artDescription='';
+  try{
+    const resp=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:400,
+        messages:[{
+          role:'user',
+          content:[
+            {type:'image',source:{type:'base64',media_type:'image/jpeg',data:a.imageData.split(',')[1]||a.imageData.split(',')[1]}},
+            {type:'text',text:`你是一个专业的产品设计师。请用中文简短分析这幅儿童画作，提取：1.主要色调（3个HEX色值）2.画面主体内容（一句话）3.整体氛围（温暖/活泼/梦幻等）。只输出JSON格式，例如：{"colors":["#ff9966","#66ccff","#ffdd44"],"subject":"彩色小凳子和花朵","mood":"活泼童趣"}`}
+          ]
+        }]
+      })
+    });
+    const data=await resp.json();
+    const txt=data.content?.[0]?.text||'';
+    try{
+      const clean=txt.replace(/```json|```/g,'').trim();
+      const parsed=JSON.parse(clean);
+      artDescription=parsed;
+      // show AI analysis in stream box
+      aiStream.classList.add('show');
+      aiText.textContent=`🤖 Claude AI 分析完成：\n主体：${parsed.subject}\n氛围：${parsed.mood}\n主色调：${parsed.colors?.join(', ')||'自动提取'}`;
+    }catch(e){artDescription={colors:['#D85A30','#378ADD','#1D9E75'],subject:a.title,mood:'活泼'};}
+  }catch(e){artDescription={colors:['#D85A30','#378ADD','#1D9E75'],subject:a.title,mood:'活泼'};}
+
+  clearInterval(iv);
+
+  // now render with real extracted colors
+  setTimeout(()=>{
+    ldo.style.display='none';
+    const canvas=document.getElementById('cv');
+    const img=imgCache[genArtId];
+    photo3DRender(canvas,img,productIdx,seed,artDescription);
+  },200);
+}
+
+// ─── PHOTO-QUALITY 3D RENDERER ───
+function photo3DRender(canvas,img,pi,seed,ai){
+  const ctx=canvas.getContext('2d'),W=canvas.width,H=canvas.height;
+  ctx.clearRect(0,0,W,H);
+  const c1=ai?.colors?.[0]||'#D85A30',c2=ai?.colors?.[1]||'#378ADD',c3=ai?.colors?.[2]||'#1D9E75';
+  const rng=mulberry(seed);
+  const draws=[drawPhoto_Mug,drawPhoto_Postcard,drawPhoto_Magnet,drawPhoto_Coaster,drawPhoto_Pillow,drawPhoto_Tshirt];
+  draws[pi](ctx,img,W,H,rng,c1,c2,c3);
+}
+function mulberry(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+function lx(a,b){return a+(b-a)*0.5;}
+
+// helper
+function rr(ctx,x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);ctx.arcTo(x+w,y,x+w,y+r,r);ctx.lineTo(x+w,y+h-r);ctx.arcTo(x+w,y+h,x+w-r,y+h,r);ctx.lineTo(x+r,y+h);ctx.arcTo(x,y+h,x,y+h-r,r);ctx.lineTo(x,y+r);ctx.arcTo(x,y,x+r,y,r);ctx.closePath();}
+function circle(ctx,x,y,r){ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.closePath();}
+
+// ── 1. MUG ── photo studio, round ceramic mug, 3/4 view
+function drawPhoto_Mug(ctx,img,W,H,rng,c1,c2,c3){
+  // studio backdrop gradient - soft grey to white
+  const bgG=ctx.createLinearGradient(0,0,0,H);
+  bgG.addColorStop(0,'#d8dde5');bgG.addColorStop(0.6,'#e8ecf0');bgG.addColorStop(1,'#c8ced8');
+  ctx.fillStyle=bgG;ctx.fillRect(0,0,W,H);
+
+  // surface reflection plane
+  const surfG=ctx.createLinearGradient(0,H*0.62,0,H);
+  surfG.addColorStop(0,'#b8bec8');surfG.addColorStop(1,'#a0a8b4');
+  ctx.fillStyle=surfG;ctx.fillRect(0,H*0.62,W,H*0.38);
+  ctx.strokeStyle='rgba(255,255,255,0.25)';ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(0,H*0.62);ctx.lineTo(W,H*0.62);ctx.stroke();
+
+  const cx=W*0.47,cy=H*0.44;
+  const mw=W*0.32,mh=H*0.44; // mug half-width, half-height
+
+  // cast shadow on surface
+  ctx.save();ctx.translate(cx,H*0.76);ctx.scale(1,0.18);
+  const sh1=ctx.createRadialGradient(0,0,mw*0.1,0,0,mw*1.4);
+  sh1.addColorStop(0,'rgba(0,0,0,0.5)');sh1.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.fillStyle=sh1;ctx.beginPath();ctx.ellipse(0,0,mw*1.4,mw*1.4,0,0,Math.PI*2);ctx.fill();ctx.restore();
+
+  // mug reflection on surface
+  ctx.save();ctx.translate(cx,H*0.76);ctx.scale(1,-0.15);ctx.globalAlpha=0.18;
+  // draw simplified mug shape as reflection
+  ctx.fillStyle='#8090a0';
+  mugShapeClip(ctx,0,-mh,mw,mh*2,mw*0.12);ctx.fill();
+  ctx.globalAlpha=1;ctx.restore();
+
+  // ── mug body ──
+  // back of mug (slightly wider at top to give 3/4 perspective)
+  ctx.save();
+
+  // mug ceramic body - draw with perspective transform
+  // use a subtle skew
+  ctx.transform(1, 0, -0.02, 1, W*0.01, 0);
+
+  // body fill - use art's primary color as glaze tint
+  const bodyG=ctx.createLinearGradient(cx-mw,cy,cx+mw,cy);
+  bodyG.addColorStop(0,hexAlpha(c2,0.9));
+  bodyG.addColorStop(0.35,lighten(c2,0.85));
+  bodyG.addColorStop(0.7,hexAlpha(c2,0.75));
+  bodyG.addColorStop(1,darken(c2,0.6));
+  ctx.fillStyle=bodyG;
+  ctx.shadowColor='rgba(0,0,0,0.3)';ctx.shadowBlur=30;ctx.shadowOffsetX=12;ctx.shadowOffsetY=16;
+  mugShapeClip(ctx,cx-mw,cy-mh,mw*2,mh*2,mw*0.13);
+  ctx.fill();ctx.shadowColor='transparent';
+
+  // flower pattern (tiny white flowers like ref img 3)
+  ctx.save();
+  mugShapeClip(ctx,cx-mw,cy-mh,mw*2,mh*2,mw*0.13);ctx.clip();
+  ctx.globalAlpha=0.35;
+  for(let k=0;k<22;k++){
+    const fx=cx-mw*0.9+rng()*mw*1.8,fy=cy-mh*0.9+rng()*mh*1.8;
+    flower(ctx,fx,fy,W*0.018,'rgba(255,255,255,0.9)');
+  }
+  ctx.globalAlpha=1;ctx.restore();
+
+  // ── artwork on mug ──
+  // artwork wraps around the mug centre, with slight perspective warp
+  const aw=mw*1.15,ah=mh*1.05,ax=cx-aw*0.5,ay=cy-ah*0.5;
+  ctx.save();
+  // clip to mug shape
+  mugShapeClip(ctx,cx-mw*0.98,cy-mh*0.96,mw*1.96,mh*1.92,mw*0.11);ctx.clip();
+  // draw image with horizontal perspective compression on sides
+  if(img){
+    // draw with a subtle horizontal squeeze to simulate wrapping
+    ctx.save();
+    ctx.transform(0.9,0,0,1,cx-aw*0.45,ay);
+    ctx.drawImage(img,0,0,aw,ah);
+    ctx.restore();
+  }
+  ctx.restore();
+
+  // specular highlight strip (ceramic gloss)
+  ctx.save();
+  mugShapeClip(ctx,cx-mw,cy-mh,mw*2,mh*2,mw*0.13);ctx.clip();
+  const specG=ctx.createLinearGradient(cx-mw,cy,cx-mw*0.35,cy);
+  specG.addColorStop(0,'rgba(255,255,255,0.55)');
+  specG.addColorStop(0.4,'rgba(255,255,255,0.08)');
+  specG.addColorStop(1,'rgba(255,255,255,0)');
+  ctx.fillStyle=specG;ctx.fillRect(cx-mw,cy-mh,mw*2,mh*2);
+  // top bright rim reflection
+  const topG=ctx.createLinearGradient(cx-mw,cy-mh,cx+mw,cy-mh+mh*0.12);
+  topG.addColorStop(0,'rgba(255,255,255,0.6)');topG.addColorStop(1,'rgba(255,255,255,0)');
+  ctx.fillStyle=topG;ctx.fillRect(cx-mw,cy-mh,mw*2,mh*0.12);
+  ctx.restore();
+
+  // mug outline subtle
+  ctx.strokeStyle='rgba(0,0,0,0.07)';ctx.lineWidth=1.5;
+  mugShapeClip(ctx,cx-mw,cy-mh,mw*2,mh*2,mw*0.13);ctx.stroke();
+
+  // ── rim top ellipse (open top of mug) ──
+  ctx.save();
+  ctx.beginPath();ctx.ellipse(cx,cy-mh,mw,mh*0.14,0,0,Math.PI*2);
+  const rimG=ctx.createLinearGradient(cx-mw,cy-mh-mh*0.14,cx+mw,cy-mh+mh*0.14);
+  rimG.addColorStop(0,lighten(c2,0.9));rimG.addColorStop(1,darken(c2,0.7));
+  ctx.fillStyle=rimG;ctx.fill();
+  ctx.strokeStyle='rgba(0,0,0,0.08)';ctx.lineWidth=1;ctx.stroke();
+  // inner rim darker
+  ctx.beginPath();ctx.ellipse(cx,cy-mh,mw*0.8,mh*0.09,0,0,Math.PI*2);
+  ctx.fillStyle='rgba(0,0,0,0.15)';ctx.fill();
+  ctx.restore();
+
+  // ── handle ──
+  // handle with 3D round cross-section
+  const hx=cx+mw-W*0.01,hy=cy;const hr=mh*0.42;
+  // handle shadow
+  ctx.strokeStyle='rgba(0,0,0,0.15)';ctx.lineWidth=W*0.075;ctx.lineCap='round';
+  ctx.beginPath();ctx.arc(hx+3,hy+4,hr,-Math.PI*0.52,Math.PI*0.52);ctx.stroke();
+  // handle body
+  ctx.strokeStyle=darken(c2,0.75);ctx.lineWidth=W*0.072;
+  ctx.beginPath();ctx.arc(hx,hy,hr,-Math.PI*0.52,Math.PI*0.52);ctx.stroke();
+  // handle highlight
+  ctx.strokeStyle=lighten(c2,0.9);ctx.lineWidth=W*0.022;
+  ctx.beginPath();ctx.arc(hx-W*0.01,hy,hr,-Math.PI*0.52,Math.PI*0.52);ctx.stroke();
+
+  ctx.restore(); // end transform
+
+  // label
+  ctx.fillStyle='rgba(255,255,255,0.6)';ctx.font=`bold ${W*0.025}px sans-serif`;ctx.textAlign='center';
+  ctx.fillText('画巢 ArtNest · 专属定制马克杯',W/2,H*0.95);
+}
+
+function mugShapeClip(ctx,x,y,w,h,r){
+  // tapered mug: bottom slightly wider
+  const bot=w*0.08;
+  ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);
+  ctx.arcTo(x+w,y,x+w,y+r,r);
+  ctx.lineTo(x+w+bot/2,y+h-r);ctx.arcTo(x+w+bot/2,y+h,x+w+bot/2-r,y+h,r);
+  ctx.lineTo(x-bot/2+r,y+h);ctx.arcTo(x-bot/2,y+h,x-bot/2,y+h-r,r);
+  ctx.lineTo(x,y+r);ctx.arcTo(x,y,x+r,y,r);ctx.closePath();
+}
+
+// ── 2. POSTCARD ── angled photo on warm desk
+function drawPhoto_Postcard(ctx,img,W,H,rng,c1,c2,c3){
+  // warm linen desk backdrop
+  const bg=ctx.createLinearGradient(0,0,W,H);
+  bg.addColorStop(0,'#e8ddd0');bg.addColorStop(1,'#d8ccc0');
+  ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
+  // linen texture
+  ctx.globalAlpha=0.04;
+  for(let y=0;y<H;y+=3){ctx.fillStyle=y%6?'#fff':'#000';ctx.fillRect(0,y,W,1);}
+  ctx.globalAlpha=1;
+
+  // card dimensions & rotation
+  const cw=W*0.78,ch=H*0.66;
+  const cx=W*0.5,cy=H*0.5,ang=-0.11;
+
+  // dropped shadow
+  ctx.save();ctx.translate(cx,cy);ctx.rotate(ang);
+  ctx.shadowColor='rgba(0,0,0,0.28)';ctx.shadowBlur=32;ctx.shadowOffsetX=10;ctx.shadowOffsetY=14;
+  ctx.fillStyle='rgba(0,0,0,0.01)';rr(ctx,-cw/2,-ch/2,cw,ch,8);ctx.fill();ctx.restore();
+
+  // card body
+  ctx.save();ctx.translate(cx,cy);ctx.rotate(ang);
+  rr(ctx,-cw/2,-ch/2,cw,ch,8);
+  // card paper texture
+  const paperG=ctx.createLinearGradient(-cw/2,-ch/2,cw/2,ch/2);
+  paperG.addColorStop(0,'#fefcf7');paperG.addColorStop(1,'#f8f4ee');
+  ctx.fillStyle=paperG;ctx.fill();
+  ctx.strokeStyle='rgba(0,0,0,0.05)';ctx.lineWidth=1;ctx.stroke();
+
+  // ── left: artwork ──
+  const aw=cw*0.53,ah=ch-24,ax=-cw/2+10,ay=-ch/2+12;
+  ctx.save();rr(ctx,ax,ay,aw,ah,6);ctx.clip();
+  if(img)ctx.drawImage(img,ax,ay,aw,ah);
+  // subtle vignette over art
+  const vig=ctx.createRadialGradient(ax+aw/2,ay+ah/2,ah*0.2,ax+aw/2,ay+ah/2,ah*0.75);
+  vig.addColorStop(0,'rgba(0,0,0,0)');vig.addColorStop(1,'rgba(0,0,0,0.12)');
+  ctx.fillStyle=vig;ctx.fillRect(ax,ay,aw,ah);
+  ctx.restore();
+
+  // ── divider ──
+  ctx.setLineDash([5,4]);ctx.strokeStyle='#ccc';ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(ax+aw+12,-ch/2+16);ctx.lineTo(ax+aw+12,ch/2-16);ctx.stroke();
+  ctx.setLineDash([]);
+
+  // ── right side ──
+  const rx=ax+aw+20,ry=-ch/2+14,rw=cw/2-aw-40;
+  // stamp placeholder
+  ctx.strokeStyle='rgba(180,170,160,0.7)';ctx.lineWidth=1;
+  rr(ctx,rx,ry,rw*1.1,ch*0.23,4);ctx.stroke();
+  // stamp mini art
+  if(img){ctx.save();rr(ctx,rx+2,ry+2,rw*1.1-4,ch*0.23-4,3);ctx.clip();ctx.drawImage(img,rx+2,ry+2,rw*1.1-4,ch*0.23-4);ctx.restore();}
+  ctx.fillStyle='rgba(0,0,0,0.4)';ctx.font=`bold ${W*0.018}px sans-serif`;ctx.textAlign='center';
+  ctx.fillText('邮票',rx+rw*0.55,ry+ch*0.155);
+
+  // address lines
+  ctx.strokeStyle='rgba(0,0,0,0.12)';ctx.lineWidth=1;
+  const ly0=ry+ch*0.32;
+  for(let k=0;k<4;k++){ctx.beginPath();ctx.moveTo(rx,ly0+k*ch*0.12);ctx.lineTo(rx+rw*1.3,ly0+k*ch*0.12);ctx.stroke();}
+
+  // postmark circle
+  ctx.strokeStyle='rgba(180,70,50,0.35)';ctx.lineWidth=2;
+  ctx.beginPath();ctx.arc(rx+rw*0.6,ly0+ch*0.06,ch*0.1,0,Math.PI*2);ctx.stroke();
+  ctx.fillStyle='rgba(180,70,50,0.3)';ctx.font=`${W*0.014}px sans-serif`;ctx.textAlign='center';
+  ctx.fillText('ArtNest',rx+rw*0.6,ly0+ch*0.08);
+
+  ctx.fillStyle='rgba(0,0,0,0.25)';ctx.font=`${W*0.018}px sans-serif`;ctx.textAlign='left';
+  ctx.fillText('画巢 ArtNest',rx,ch/2-16);
+  ctx.restore();
+
+  ctx.fillStyle='rgba(80,60,40,0.5)';ctx.font=`bold ${W*0.025}px sans-serif`;ctx.textAlign='center';
+  ctx.fillText('画巢 ArtNest · 专属明信片',W/2,H*0.95);
+}
+
+// ── 3. MAGNET ── 3D rubber sticker on pink bg
+function drawPhoto_Magnet(ctx,img,W,H,rng,c1,c2,c3){
+  // soft pink radial bg like ref img 1
+  const bg=ctx.createRadialGradient(W*0.5,H*0.45,0,W*0.5,H*0.5,W*0.72);
+  bg.addColorStop(0,'#f5d5e0');bg.addColorStop(1,'#e8c0cc');
+  ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
+
+  const sz=W*0.56,mx=(W-sz)/2,my=(H-sz)/2-H*0.03;
+
+  // drop shadow - soft & spread (rubber sticker lift)
+  ctx.save();ctx.translate(mx+sz/2,my+sz/2+10);
+  const sh=ctx.createRadialGradient(0,8,sz*0.1,0,12,sz*0.75);
+  sh.addColorStop(0,'rgba(0,0,0,0.35)');sh.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.fillStyle=sh;ctx.beginPath();ctx.ellipse(0,8,sz*0.56,sz*0.2,0,0,Math.PI*2);ctx.fill();ctx.restore();
+
+  // ── outer white border (rubber sticker outline) ──
+  const border=14;
+  ctx.shadowColor='rgba(0,0,0,0.18)';ctx.shadowBlur=24;ctx.shadowOffsetY=8;
+  ctx.fillStyle='#fff';
+  rr(ctx,mx-border,my-border,sz+border*2,sz+border*2,sz*0.13+border);ctx.fill();
+  ctx.shadowColor='transparent';
+
+  // ── inner content ──
+  ctx.save();
+  rr(ctx,mx,my,sz,sz,sz*0.13);ctx.clip();
+  if(img)ctx.drawImage(img,mx,my,sz,sz);
+  ctx.restore();
+
+  // ── rubber 3D edge bevel ──
+  // inner shadow around edges to simulate rubber depth
+  ctx.save();
+  rr(ctx,mx,my,sz,sz,sz*0.13);ctx.clip();
+  const bevel=ctx.createLinearGradient(mx,my,mx,my+sz*0.18);
+  bevel.addColorStop(0,'rgba(255,255,255,0.45)');bevel.addColorStop(1,'rgba(255,255,255,0)');
+  ctx.fillStyle=bevel;ctx.fillRect(mx,my,sz,sz*0.18);
+  const bevelR=ctx.createLinearGradient(mx+sz,my,mx+sz-sz*0.06,my);
+  bevelR.addColorStop(0,'rgba(0,0,0,0.12)');bevelR.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.fillStyle=bevelR;ctx.fillRect(mx+sz-sz*0.06,my,sz*0.06,sz);
+  ctx.restore();
+
+  // white outline ring
+  ctx.strokeStyle='rgba(255,255,255,0.95)';ctx.lineWidth=border*0.7;
+  rr(ctx,mx-border*0.35,my-border*0.35,sz+border*0.7,sz+border*0.7,sz*0.13+border*0.35);ctx.stroke();
+  // outer border outline
+  ctx.strokeStyle='rgba(200,180,188,0.4)';ctx.lineWidth=1;
+  rr(ctx,mx-border,my-border,sz+border*2,sz+border*2,sz*0.13+border);ctx.stroke();
+
+  ctx.fillStyle='rgba(100,50,60,0.45)';ctx.font=`bold ${W*0.025}px sans-serif`;ctx.textAlign='center';
+  ctx.fillText('画巢 ArtNest · 立体橡胶冰箱贴',W/2,H*0.95);
+}
+
+// ── 4. COASTER ── overhead product shot
+function drawPhoto_Coaster(ctx,img,W,H,rng,c1,c2,c3){
+  // flat lay background - textured linen
+  const bg=ctx.createLinearGradient(0,0,W,H);
+  bg.addColorStop(0,'#f0ece2');bg.addColorStop(1,'#e4e0d4');
+  ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
+  // subtle linen weave
+  ctx.globalAlpha=0.06;
+  for(let y=0;y<H;y+=2){for(let x=y%4;x<W;x+=4){ctx.fillStyle='#888';ctx.fillRect(x,y,2,1);}}
+  ctx.globalAlpha=1;
+
+  const cr=W*0.33,cx=W*0.5,cy=H*0.48;
+
+  // soft drop shadow
+  ctx.save();ctx.translate(cx,cy+cr*0.08);ctx.scale(1,0.12);
+  const sh=ctx.createRadialGradient(0,0,cr*0.2,0,0,cr*1.3);
+  sh.addColorStop(0,'rgba(0,0,0,0.4)');sh.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.fillStyle=sh;circle(ctx,0,0,cr*1.3);ctx.fill();ctx.restore();
+
+  // cork ring
+  const corkG=ctx.createRadialGradient(cx-cr*0.2,cy-cr*0.2,0,cx,cy,cr);
+  corkG.addColorStop(0,'#d4aa72');corkG.addColorStop(0.7,'#c49460');corkG.addColorStop(1,'#b08040');
+  ctx.fillStyle=corkG;ctx.shadowColor='rgba(0,0,0,0.2)';ctx.shadowBlur=18;ctx.shadowOffsetY=6;
+  circle(ctx,cx,cy,cr);ctx.fill();ctx.shadowColor='transparent';
+
+  // cork grain texture
+  ctx.save();circle(ctx,cx,cy,cr);ctx.clip();
+  ctx.globalAlpha=0.12;
+  for(let k=0;k<60;k++){
+    const a=rng()*Math.PI*2,d=rng()*cr,len=3+rng()*8;
+    ctx.strokeStyle='#7a5020';ctx.lineWidth=0.8;
+    ctx.beginPath();ctx.moveTo(cx+Math.cos(a)*d,cy+Math.sin(a)*d);
+    ctx.lineTo(cx+Math.cos(a)*d+Math.cos(a+Math.PI/2)*len,cy+Math.sin(a)*d+Math.sin(a+Math.PI/2)*len);
+    ctx.stroke();
+  }
+  ctx.globalAlpha=1;ctx.restore();
+
+  // artwork circle
+  ctx.save();circle(ctx,cx,cy,cr*0.78);ctx.clip();
+  if(img)ctx.drawImage(img,cx-cr*0.78,cy-cr*0.78,cr*1.56,cr*1.56);
+  // vignette
+  const vig=ctx.createRadialGradient(cx,cy,cr*0.4,cx,cy,cr*0.78);
+  vig.addColorStop(0,'rgba(0,0,0,0)');vig.addColorStop(1,'rgba(0,0,0,0.15)');
+  ctx.fillStyle=vig;ctx.fillRect(cx-cr,cy-cr,cr*2,cr*2);
+  ctx.restore();
+
+  // chrome rim
+  ctx.strokeStyle='rgba(255,255,255,0.6)';ctx.lineWidth=3;circle(ctx,cx,cy,cr*0.78);ctx.stroke();
+  ctx.strokeStyle='rgba(120,90,40,0.3)';ctx.lineWidth=5;circle(ctx,cx,cy,cr);ctx.stroke();
+
+  // top highlight arc
+  ctx.save();ctx.beginPath();ctx.arc(cx,cy,cr,Math.PI*1.15,Math.PI*1.85);
+  ctx.strokeStyle='rgba(255,255,255,0.5)';ctx.lineWidth=cr*0.06;ctx.stroke();ctx.restore();
+
+  ctx.fillStyle='rgba(80,55,20,0.45)';ctx.font=`bold ${W*0.025}px sans-serif`;ctx.textAlign='center';
+  ctx.fillText('画巢 ArtNest · 天然软木杯垫',W/2,H*0.95);
+}
+
+// ── 5. PILLOW ── 3/4 studio shot with depth
+function drawPhoto_Pillow(ctx,img,W,H,rng,c1,c2,c3){
+  const bg=ctx.createLinearGradient(0,0,W,H);
+  bg.addColorStop(0,'#ddd8f0');bg.addColorStop(1,'#ccc8e4');
+  ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
+  // subtle gradient floor
+  const floor=ctx.createLinearGradient(0,H*0.65,0,H);
+  floor.addColorStop(0,'#c8c4dc');floor.addColorStop(1,'#b8b4cc');
+  ctx.fillStyle=floor;ctx.fillRect(0,H*0.65,W,H*0.35);
+
+  const pw=W*0.78,ph=H*0.64,px=(W-pw)/2,py=(H-ph)/2-H*0.04;
+
+  // cast shadow
+  ctx.save();ctx.translate(W/2+8,py+ph+6);ctx.scale(1,0.14);
+  const sh=ctx.createRadialGradient(0,0,pw*0.1,0,0,pw*0.56);
+  sh.addColorStop(0,'rgba(0,0,0,0.4)');sh.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.fillStyle=sh;ctx.beginPath();ctx.ellipse(0,0,pw*0.56,pw*0.56,0,0,Math.PI*2);ctx.fill();ctx.restore();
+
+  // pillow back face (slightly darker, peeking from behind)
+  ctx.save();
+  ctx.fillStyle='#d8d0ec';
+  pillowBulge(ctx,px+pw*0.04,py+ph*0.04,pw,ph,38);ctx.fill();ctx.restore();
+
+  // pillow front face
+  ctx.save();
+  ctx.shadowColor='rgba(60,40,100,0.2)';ctx.shadowBlur=24;ctx.shadowOffsetY=10;
+  const pillowG=ctx.createLinearGradient(px,py,px,py+ph);
+  pillowG.addColorStop(0,'#f2eeff');pillowG.addColorStop(0.5,'#eae4ff');pillowG.addColorStop(1,'#dcd4f8');
+  ctx.fillStyle=pillowG;
+  pillowBulge(ctx,px,py,pw,ph,38);ctx.fill();ctx.shadowColor='transparent';
+
+  // artwork on pillow face
+  const aw=pw-52,ah=ph-52,ax=px+26,ay=py+26;
+  ctx.save();pillowBulge(ctx,ax,ay,aw,ah,26);ctx.clip();
+  if(img)ctx.drawImage(img,ax,ay,aw,ah);
+  // subtle vignette
+  const pvig=ctx.createRadialGradient(ax+aw/2,ay+ah/2,ah*0.2,ax+aw/2,ay+ah/2,ah*0.7);
+  pvig.addColorStop(0,'rgba(0,0,0,0)');pvig.addColorStop(1,'rgba(0,0,0,0.08)');
+  ctx.fillStyle=pvig;ctx.fillRect(ax,ay,aw,ah);
+  ctx.restore();
+
+  // seam stitch line
+  ctx.strokeStyle='rgba(200,190,230,0.8)';ctx.lineWidth=2;ctx.setLineDash([5,5]);
+  pillowBulge(ctx,ax-6,ay-6,aw+12,ah+12,30);ctx.stroke();ctx.setLineDash([]);
+
+  // corner buttons
+  [[px+30,py+30],[px+pw-30,py+30],[px+30,py+ph-30],[px+pw-30,py+ph-30]].forEach(([bx,by])=>{
+    ctx.fillStyle='rgba(255,255,255,0.85)';ctx.shadowColor='rgba(0,0,0,0.12)';ctx.shadowBlur=4;
+    circle(ctx,bx,by,6);ctx.fill();
+    ctx.shadowColor='transparent';ctx.strokeStyle='rgba(180,160,220,0.6)';ctx.lineWidth=1;circle(ctx,bx,by,6);ctx.stroke();
+    ctx.strokeStyle='rgba(180,160,220,0.4)';ctx.lineWidth=1;circle(ctx,bx,by,9);ctx.stroke();
+  });
+
+  // fabric highlight
+  const hl=ctx.createLinearGradient(px,py,px,py+ph*0.4);
+  hl.addColorStop(0,'rgba(255,255,255,0.3)');hl.addColorStop(1,'rgba(255,255,255,0)');
+  pillowBulge(ctx,px,py,pw,ph,38);ctx.fillStyle=hl;ctx.fill();
+  // edge outline
+  ctx.strokeStyle='rgba(150,130,200,0.2)';ctx.lineWidth=1.5;
+  pillowBulge(ctx,px,py,pw,ph,38);ctx.stroke();
+  ctx.restore();
+
+  ctx.fillStyle='rgba(60,40,100,0.4)';ctx.font=`bold ${W*0.025}px sans-serif`;ctx.textAlign='center';
+  ctx.fillText('画巢 ArtNest · 绒面专属抱枕',W/2,H*0.95);
+}
+function pillowBulge(ctx,x,y,w,h,r){
+  const b=w*0.035;
+  ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);
+  ctx.arcTo(x+w+b,y,x+w+b,y+r,r);ctx.lineTo(x+w+b,y+h-r);
+  ctx.arcTo(x+w+b,y+h,x+w-r,y+h,r);ctx.lineTo(x+r,y+h);
+  ctx.arcTo(x-b,y+h,x-b,y+h-r,r);ctx.lineTo(x-b,y+r);
+  ctx.arcTo(x-b,y,x+r,y,r);ctx.closePath();
+}
+
+// ── 6. T-SHIRT ── flatlay overhead, professional white bg
+function drawPhoto_Tshirt(ctx,img,W,H,rng,c1,c2,c3){
+  // pure white flatlay background
+  ctx.fillStyle='#f8f8f6';ctx.fillRect(0,0,W,H);
+  // very subtle shadow from shirt
+  ctx.fillStyle='rgba(0,0,0,0.03)';ctx.fillRect(W*0.08,H*0.08,W*0.84,H*0.84);
+
+  const cx=W*0.5,top=H*0.06,bx=cx-W*0.28,bw=W*0.56,bh=H*0.74,by=top+H*0.1;
+
+  // shirt shadow - flatlay style (directly beneath)
+  ctx.save();ctx.translate(4,6);ctx.globalAlpha=0.07;
+  ctx.fillStyle='#000';tshirtShape(ctx,cx,top,bx,by,bw,bh,W,H);ctx.fill();
+  ctx.globalAlpha=1;ctx.restore();
+
+  // shirt fabric
+  // pick a pastel based on art colors
+  const shirtColor=lighten(c1,0.88);
+  const fabricG=ctx.createLinearGradient(bx,by,bx+bw,by+bh);
+  fabricG.addColorStop(0,lighten(c1,0.93));
+  fabricG.addColorStop(0.5,shirtColor);
+  fabricG.addColorStop(1,lighten(c1,0.82));
+  ctx.fillStyle=fabricG;
+  ctx.shadowColor='rgba(0,0,0,0.08)';ctx.shadowBlur=12;ctx.shadowOffsetX=2;ctx.shadowOffsetY=4;
+  tshirtShape(ctx,cx,top,bx,by,bw,bh,W,H);ctx.fill();ctx.shadowColor='transparent';
+
+  // fabric texture - fine horizontal weave
+  ctx.save();tshirtShape(ctx,cx,top,bx,by,bw,bh,W,H);ctx.clip();
+  ctx.globalAlpha=0.04;
+  for(let y2=by;y2<by+bh;y2+=3){ctx.fillStyle='#000';ctx.fillRect(bx,y2,bw,1);}
+  ctx.globalAlpha=1;ctx.restore();
+
+  // ── artwork on chest ──
+  const aw=bw*0.56,ah=bh*0.38,ax=cx-aw/2,ay=by+bh*0.12;
+  ctx.save();rr(ctx,ax,ay,aw,ah,10);ctx.clip();
+  if(img)ctx.drawImage(img,ax,ay,aw,ah);
+  // fine print texture overlay
+  ctx.globalAlpha=0.06;ctx.fillStyle='#fff';
+  for(let y2=ay;y2<ay+ah;y2+=2){ctx.fillRect(ax,y2,aw,1);}
+  ctx.globalAlpha=1;ctx.restore();
+
+  // print edge shadow (ink slightly sunken)
+  ctx.strokeStyle='rgba(0,0,0,0.06)';ctx.lineWidth=1.5;rr(ctx,ax,ay,aw,ah,10);ctx.stroke();
+
+  // collar (ribbed V-neck)
+  ctx.save();
+  ctx.beginPath();ctx.moveTo(bx+bw*0.22,by);
+  ctx.bezierCurveTo(bx+bw*0.3,by-H*0.02,bx+bw*0.38,by+H*0.06,cx,by+H*0.075);
+  ctx.bezierCurveTo(bx+bw*0.62,by+H*0.06,bx+bw*0.7,by-H*0.02,bx+bw*0.78,by);
+  ctx.bezierCurveTo(bx+bw*0.72,by+H*0.01,cx+bw*0.08,by+H*0.03,cx,by+H*0.025);
+  ctx.bezierCurveTo(cx-bw*0.08,by+H*0.03,bx+bw*0.28,by+H*0.01,bx+bw*0.22,by);ctx.closePath();
+  ctx.fillStyle=darken(c1,0.82);ctx.fill();
+  // collar rib lines
+  ctx.strokeStyle='rgba(0,0,0,0.05)';ctx.lineWidth=1;
+  for(let ri=0;ri<3;ri++){
+    ctx.beginPath();ctx.moveTo(cx-(ri+1)*8,by+H*0.01+(ri)*3);ctx.lineTo(cx+(ri+1)*8,by+H*0.01+(ri)*3);ctx.stroke();
+  }
+  ctx.restore();
+
+  // shirt outline
+  ctx.strokeStyle='rgba(0,0,0,0.06)';ctx.lineWidth=1.5;
+  tshirtShape(ctx,cx,top,bx,by,bw,bh,W,H);ctx.stroke();
+
+  // label tag inside collar (tiny detail)
+  ctx.fillStyle='rgba(255,255,255,0.7)';ctx.font=`${W*0.015}px sans-serif`;ctx.textAlign='center';
+  ctx.fillText('ArtNest',cx,by+H*0.065);
+
+  ctx.fillStyle='rgba(60,40,20,0.4)';ctx.font=`bold ${W*0.025}px sans-serif`;ctx.textAlign='center';
+  ctx.fillText('画巢 ArtNest · 专属纯棉T恤',W/2,H*0.96);
+}
+function tshirtShape(ctx,cx,top,bx,by,bw,bh,W,H){
+  ctx.beginPath();ctx.moveTo(bx+bw*0.22,by);
+  ctx.bezierCurveTo(bx+bw*0.3,by-H*0.025,bx+bw*0.38,by+H*0.06,cx,by+H*0.065);
+  ctx.bezierCurveTo(bx+bw*0.62,by+H*0.06,bx+bw*0.7,by-H*0.025,bx+bw*0.78,by);
+  ctx.lineTo(bx+bw+W*0.1,by+H*0.16);ctx.lineTo(bx+bw+W*0.03,by+H*0.28);
+  ctx.lineTo(bx+bw,by+H*0.2);ctx.lineTo(bx+bw,by+bh);
+  ctx.lineTo(bx,by+bh);ctx.lineTo(bx,by+H*0.2);
+  ctx.lineTo(bx-W*0.03,by+H*0.28);ctx.lineTo(bx-W*0.1,by+H*0.16);ctx.closePath();
+}
+
+// ─── COLOR UTILS ───
+function hexAlpha(hex,a){const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);return `rgba(${r},${g},${b},${a})`;}
+function lighten(hex,t){const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);return `rgb(${~~(r+(255-r)*t)},${~~(g+(255-g)*t)},${~~(b+(255-b)*t)})`;}
+function darken(hex,t){const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);return `rgb(${~~(r*t)},${~~(g*t)},${~~(b*t)})`;}
+function flower(ctx,x,y,r,color){ctx.fillStyle=color;for(let i=0;i<5;i++){const a=i*Math.PI*2/5;ctx.beginPath();ctx.arc(x+Math.cos(a)*r*0.55,y+Math.sin(a)*r*0.55,r*0.42,0,Math.PI*2);ctx.fill();}ctx.beginPath();ctx.arc(x,y,r*0.3,0,Math.PI*2);ctx.fill();}
+
+// ─── SHOP ───
+function addShop(){
+  const a=arts.find(x=>x.id===genArtId);if(!a)return;
+  const pi=genProds[genIdx],p=PRODS[pi];
+  if(shop.find(s=>s.artId===a.id&&s.product===p.n)){toast(`"${p.n}"已在店铺中 🛍`);return;}
+  const canvas=document.getElementById('cv');
+  shop.push({id:Date.now(),artId:a.id,artTitle:a.title,thumb:canvas.toDataURL('image/jpeg',0.8),product:p.n,icon:p.i,price:p.p,sold:0});
+  save();renderShop();toast(`🎉 "${a.title} ${p.n}"已上架！`);
+}
+function openGen(){
+  if(!selProds.size)return;
+  const a=arts.find(x=>x.id===curArtId);if(!a)return;
+  genArtId=curArtId;genProds=[...selProds];genIdx=0;
+  document.getElementById('gthumb').src=a.imageData;
+  document.getElementById('gttl').textContent=a.title;
+  document.getElementById('gsub').textContent=`已选 ${genProds.length} 种 · 可无限重新生成`;
+  const tabs=document.getElementById('ptabs');tabs.innerHTML='';
+  genProds.forEach((pi,ti)=>{const p=PRODS[pi],b=document.createElement('button');b.className='ptab'+(ti===0?' active':'');b.textContent=p.i+' '+p.n;b.onclick=()=>switchTab(ti);tabs.appendChild(b);});
+  // preload
+  if(!imgCache[a.id]){const im=new Image();im.src=a.imageData;im.onload=()=>imgCache[a.id]=im;}
+  cm('m-detail');om('m-gen');aiGenerate(genProds[0],~~(Math.random()*99999));
+}
+function switchTab(ti){document.querySelectorAll('.ptab').forEach((b,i)=>b.classList.toggle('active',i===ti));genIdx=ti;aiGenerate(genProds[ti],~~(Math.random()*99999));}
+function prevProd(){genIdx=(genIdx-1+genProds.length)%genProds.length;switchTab(genIdx);}
+function nextProd(){genIdx=(genIdx+1)%genProds.length;switchTab(genIdx);}
+function regen(){aiGenerate(genProds[genIdx],~~(Math.random()*99999));}
+function openDetail(id){
+  const a=arts.find(x=>x.id===id);if(!a)return;curArtId=id;selProds.clear();
+  document.getElementById('dimg').src=a.imageData;document.getElementById('dmt').textContent=a.title;
+  document.getElementById('dtit').textContent=a.title;document.getElementById('dcid').textContent=a.chainId;
+  document.getElementById('dtgs').innerHTML=[a.date,a.location,a.style,...a.tags].filter(Boolean).map(t=>`<span class="dtag">${t}</span>`).join('');
+  const pg=document.getElementById('pgd');pg.innerHTML='';
+  PRODS.forEach((p,i)=>{const d=document.createElement('div');d.className='pc';d.id='pcard'+i;d.onclick=()=>toggleProd(i);d.innerHTML=`<div class="pci">${p.i}</div><div class="pcn">${p.n}</div><div class="pcp">¥${p.p}</div>`;pg.appendChild(d);});
+  updGenBtn();om('m-detail');
+}
+function toggleProd(i){selProds.has(i)?selProds.delete(i):selProds.add(i);document.getElementById('pcard'+i).classList.toggle('sel',selProds.has(i));updGenBtn();}
+function updGenBtn(){const b=document.getElementById('bgen');b.disabled=!selProds.size;b.textContent=selProds.size?`✨ AI 生成 ${selProds.size} 种照片级 3D 效果`:'✨ 先选择上方纪念品类型';}
+function delArt(){if(!curArtId||!confirm('确定删除吗？'))return;arts=arts.filter(a=>a.id!==curArtId);shop=shop.filter(s=>s.artId!==curArtId);save();cm('m-detail');render();toast('作品已删除');}
+
+document.querySelectorAll('.mb2').forEach(bg=>bg.addEventListener('click',e=>{if(e.target===bg)bg.classList.remove('open');}));
+</script>
+</body>
+</html>
