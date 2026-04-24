@@ -158,13 +158,13 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 <body>
 <div class="app">
   <div class="topbar">
-    <div class="logo"><img src="logo.jpg" style="width:28px;height:28px;border-radius:50%;object-fit:cover;vertical-align:middle;margin-right:6px"/>画巢 <em>ArtNest</em></div>
+    <div class="logo"><img src="logo.jpg" style="width:42px;height:42px;border-radius:50%;object-fit:cover;vertical-align:middle;margin-right:8px"/>画巢 <em>ArtNest</em></div>
     <div style="display:flex;gap:14px">
       <button class="icon-btn">🔔</button>
       <button class="icon-btn" onclick="go('profile')">👤</button>
     </div>
   </div>
-  <div class="page active" id="page-discover">
+  <div class="page" id="page-discover">
     <div class="sw"><input class="si" placeholder="🔍 搜索画作、艺术家..." id="qi" oninput="renderDiscover()"/></div>
     <div class="tw">
       <div class="tag active" onclick="setTag(this,'全部')">全部</div>
@@ -187,7 +187,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     <div class="em" id="em"><div style="font-size:48px;opacity:.4">🖼</div><p style="font-size:13px;line-height:1.6">还没有作品<br>点击上方上传你的第一幅画</p></div>
   </div>
   <!-- MISSION PAGE -->
-  <div class="page" id="page-mission">
+  <div class="page active" id="page-mission">
     <!-- Hero -->
     <div style="position:relative;overflow:hidden;background:linear-gradient(160deg,#1a3a2a 0%,#2d5a3d 50%,#1a4a5a 100%);padding:48px 24px 36px;text-align:center">
       <!-- subtle dots pattern -->
@@ -339,10 +339,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     <div id="pps" style="display:none"><div style="padding:30px;text-align:center;color:var(--t3);font-size:13px">商店暂无商品</div></div>
   </div>
   <div class="nav">
-    <button class="nb active" id="nav-discover" onclick="go('discover')"><span class="ni">🏠</span>发现</button>
+    <button class="nb active" id="nav-mission" onclick="go('mission')"><span class="ni">🌍</span>初心</button>
+    <button class="nb" id="nav-discover" onclick="go('discover')"><span class="ni">🏠</span>发现</button>
     <button class="nb" id="nav-museum" onclick="go('museum')"><span class="ni">🏛</span>博物馆</button>
     <button class="nb" id="nav-shop" onclick="go('shop')"><span class="ni">🛍</span>手作店</button>
-    <button class="nb" id="nav-mission" onclick="go('mission')"><span class="ni">🌍</span>初心</button>
     <button class="nb" id="nav-profile" onclick="go('profile')"><span class="ni">🎨</span>我的</button>
   </div>
 </div>
@@ -520,7 +520,7 @@ function renderMuseum(){
   em.style.display='none';document.getElementById('ms').textContent=`共 ${arts.length} 件作品`;
   arts.forEach(a=>{
     const el=document.createElement('div');el.className='mi';el.onclick=()=>openDetail(a.id);
-    el.innerHTML=`<img src="${a.imageData}" alt="${a.title}" loading="lazy"/><div class="ct">${a.chainId.slice(0,8)}…</div><img src="logo.jpg" class="logo-wm"/>`;g.appendChild(el);
+    el.innerHTML=`<img src="${a.imageData}" alt="${a.title}" loading="lazy"/><div class="ct">${a.chainId.slice(0,8)}…</div>`;g.appendChild(el);
   });
 }
 function renderDiscover(){
@@ -530,7 +530,7 @@ function renderDiscover(){
   const bgs=['#FAECE7','#E1F5EE','#E6F1FB','#FAEEDA','#FBEAF0','#EAF3DE'];
   flt.forEach(a=>{
     const c=document.createElement('div');c.className='wcard';c.onclick=()=>openDetail(a.id);
-    c.innerHTML=`<img src="${a.imageData}" loading="lazy" style="background:${bgs[a.id%6]}"/><img src="logo.jpg" class="logo-wm"/>
+    c.innerHTML=`<img src="${a.imageData}" loading="lazy" style="background:${bgs[a.id%6]}"/>
       <div class="wci"><div class="wct">${a.title}</div><div class="wca">
       <div class="ar"><div class="avx" style="background:var(--coral)">我</div><span>小艺术家</span></div>
       <button class="sb ${a.starred?'starred':''}" onclick="toggleStar(event,${a.id})">⭐ ${a.stars}</button></div></div>`;
@@ -564,7 +564,7 @@ function renderProfile(){
   updateStats();const pg=document.getElementById('pg'),pe=document.getElementById('pe');pg.innerHTML='';
   if(!arts.length){pe.style.display='flex';return;}pe.style.display='none';
   arts.forEach(a=>{const el=document.createElement('div');el.className='mi';el.onclick=()=>openDetail(a.id);
-    el.innerHTML=`<img src="${a.imageData}" loading="lazy"/><div class="ct">${a.chainId.slice(0,8)}…</div><img src="logo.jpg" class="logo-wm"/>`;pg.appendChild(el);});
+    el.innerHTML=`<img src="${a.imageData}" loading="lazy"/><div class="ct">${a.chainId.slice(0,8)}…</div>`;pg.appendChild(el);});
   renderProfileShop();
 }
 function replaceShopImg(e,sid){
@@ -586,7 +586,7 @@ function renderProfileShop(){
   const g=document.createElement('div');g.style.cssText='display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:12px';
   shop.forEach(s=>{
     const c=document.createElement('div');c.className='sc';
-    c.innerHTML=`<div class="si2"><img src="${s.thumb}" alt="${s.product}" style="width:100%;height:100%;object-fit:cover;display:block"/><div class="sbg">${s.icon} ${s.product}</div><img src="logo.jpg" class="logo-wm"/></div>
+    c.innerHTML=`<div class="si2"><img src="${s.thumb}" alt="${s.product}" style="width:100%;height:100%;object-fit:cover;display:block"/><div class="sbg">${s.icon} ${s.product}</div></div>
       <div class="sif"><div class="sn">${s.artTitle} · ${s.product}</div><div class="sp">¥ ${s.price}</div><div class="ss">已售 ${s.sold} 件</div></div>`;
     g.appendChild(c);
   });
